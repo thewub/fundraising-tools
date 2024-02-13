@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banner diff tool</title>
+    <link rel="stylesheet" href="https://www.mediawiki.org/w/load.php?modules=mediawiki.diff.styles&only=styles">
+    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        @media (prefers-reduced-motion) {
+            * {
+                transition-duration: 0s !important;
+            }
+        }
+        :root {
+            --preview-width: auto;
+            --preview-height: auto;
+            --preview-scale: 1;
+            --preview-scale-zoomed: 1;
+        }
+        body {
+            font-family: sans-serif;
+            overflow-y: scroll;
+            text-align: center;
+            line-height: 1.4;
+        }
+        a {
+            font-weight: bold;
+            color: #36c;
+        }
+        a:visited {
+            color: #6b4ba1;
+        }
+
+        #settings {
+            margin-bottom: 1em;
+        }
+
+        .diff {
+            text-align: left;
+        }
+
+        #header-row {
+            height: 4.5em;
+        }
+        #header-banner1,
+        #header-banner2 {
+            position: absolute;
+            transition: left 0.3s;
+        }
+        #title-banner1,
+        #title-banner2 {
+            font-weight: bold;
+        }
+        .header-links a {
+            margin: 0 0.25em;
+        }
+
+        body.live-preview-enabled #enable-live-preview,
+        body:not(.live-preview-enabled) #disable-live-preview {
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+            pointer-events: none;
+        }
+
+        .preview-settings {
+            visibility: hidden;
+        }
+        .live-preview-enabled .preview-settings {
+            visibility: visible;
+        }
+
+        .scale {
+            font-size: small;
+        }
+
+        #scale-amount-zoomed {
+            display: none;
+        }
+        .zoomed-banner1 #scale-amount,
+        .zoomed-banner2 #scale-amount {
+            display: none;
+        }
+        .zoomed-banner1 #scale-amount-zoomed,
+        .zoomed-banner2 #scale-amount-zoomed {
+            display: inline;
+        }
+
+        .live-preview-enabled #diff-element { display: none; }
+
+        .zoom-link { display: none; }
+        .live-preview-enabled .zoom-link { display: inline; }
+
+        #live-preview-row { display: none; }
+        .live-preview-enabled #live-preview-row { display: block; }
+
+        #header-banner1,
+        #live-preview-banner1 {
+            left: 25%;
+            translate: -50%;
+        }
+
+        #header-banner2,
+        #live-preview-banner2 {
+            left: 75%;
+            translate: -50%;
+        }
+
+        iframe {
+            position: absolute;
+            margin: 0 auto;
+            border: 1px solid #000;
+            transform-origin: 50% 0;
+            transition: left 0.3s, transform 0.3s;
+            width: var(--preview-width);
+            height: var(--preview-height);
+            transform: scale( var(--preview-scale) );
+        }
+
+        .zoomed-banner1 #live-preview-banner1,
+        .zoomed-banner2 #live-preview-banner2 {
+            left: 50%;
+            transform: scale( var(--preview-scale-zoomed) );
+        }
+
+        .zoomed-banner1 #header-banner1,
+        .zoomed-banner2 #header-banner2 {
+            left: 50%;
+        }
+
+        .zoomed-banner1 #live-preview-banner2,
+        .zoomed-banner1 #header-banner2 {
+            left: 125%;
+        }
+        .zoomed-banner2 #live-preview-banner1,
+        .zoomed-banner2 #header-banner1 {
+            left: -25%;
+        }
+    </style>
+</head>
+<body>
+    <div id="settings">
+        <a href="#" id="disable-live-preview">Diff (d)</a> / <a href="#" id="enable-live-preview">Preview (p)</a>
+        <div class="preview-settings">
+            <select id="preview-size-select">
+                <option value="360x800">360x800</option><!-- Samsung Galaxy S20 -->
+                <option value="390x844">390x844</option>
+                <hr>
+                <option value="1920x1080">1920x1080</option>
+                <option value="1366x768">1366x768</option>
+                <option value="1600x1200">1600x1200</option>
+                <option value="1440x900">1440x900</option>
+                <option value="1280x800">1280x800</option>
+                <option value="1024x768">1024x768</option>
+            </select>
+            (r)
+            <span class="scale">
+                Scale: <span id="scale-amount"></span><span id="scale-amount-zoomed"></span>×
+            </span>
+        </div>
+    </div>
+    <div id="header-row">
+        <div id="header-banner1">
+            <div id="title-banner1"></div>
+            <div><span id="size-banner1"></span></div>
+            <div class="header-links">
+                <a id="edit-banner1">Edit</a>
+                <a id="preview-banner1">On-site preview</a>
+                <a href="#" class="zoom-link" id="zoom-banner1">Zoom (1)</a>
+            </div>
+        </div>
+        <div id="header-banner2">
+            <div id="title-banner2"></div>
+            <div><span id="size-banner2"></span> <span id="size-change"></span></div>
+            <div class="header-links">
+                <a id="edit-banner2">Edit</a>
+                <a id="preview-banner2">On-site preview</a>
+                <a href="#" class="zoom-link" id="zoom-banner2">Zoom (2)</a>
+            </div>
+        </div>
+    </div>
+    <table class="diff">
+        <colgroup>
+            <col class="diff-marker">
+            <col class="diff-content">
+            <col class="diff-marker">
+            <col class="diff-content">
+        </colgroup>
+        <tbody id="diff-element">
+        </tbody>
+    </table>
+    <div id="live-preview-row">
+        <iframe id="live-preview-banner1" credentialless></iframe>
+        <iframe id="live-preview-banner2" credentialless></iframe>
+    </div>
+    <div id="status">Loading...</div>
+
+<script>
+(function() {
+
+    /**
+     * Lock selection to one side at a time
+     * From resources/src/mediawiki.diff.styles/diff.js
+     */
+    $( function setDiffSideProtection() {
+        /**
+         * @param {Node} node
+         * @return {string|undefined}
+         * @ignore
+         */
+        function getNodeSide( node ) {
+            if ( $( node ).closest( '.diff-side-deleted' ).length !== 0 ) {
+                return 'deleted';
+            } else if ( $( node ).closest( '.diff-side-added' ).length !== 0 ) {
+                return 'added';
+            } else {
+                // Not inside the diff.
+                return undefined;
+            }
+        }
+
+        /**
+         * @return {string|undefined}
+         * @ignore
+         */
+        function getCurrentlyLockedSide() {
+            return $( '.diff' ).attr( 'data-selected-side' );
+        }
+
+        /**
+         * @param {string|undefined} side Either "added" or "deleted", or undefined to unset.
+         * @ignore
+         */
+        function setSideLock( side ) {
+            $( '.diff' ).attr( 'data-selected-side', side );
+        }
+
+        /**
+         * @param {MouseEvent} e
+         * @ignore
+         */
+        function maybeClearSelectProtection( e ) {
+            if ( e.button === 2 ) {
+                // Right click.
+                return;
+            }
+            var clickSide = getNodeSide( e.target );
+            if ( getCurrentlyLockedSide() !== clickSide ) {
+                document.getSelection().removeAllRanges();
+            }
+            setSideLock( clickSide );
+        }
+
+        function selectionHandler() {
+            var textNode = document.getSelection().anchorNode;
+
+            if ( !textNode ) {
+                return;
+            }
+
+            setSideLock( getNodeSide( textNode ) );
+        }
+
+        $( document ).on( 'selectionchange', selectionHandler );
+        $( document ).on( 'mousedown', maybeClearSelectProtection );
+    } );
+
+
+    /**
+     * This gets a lot of info (more than we need), but breaks for less standard names
+     * But keep it around as it might be useful starting point for future projects
+     * @param  {string} bannerName
+     * @return {object}
+     */
+    function parseBannerName( bannerName ) {
+        let trimmedName = bannerName.match(/B\d\d\d\d.*/)[0]; // remove user name from start
+        let x = trimmedName.split('_');
+        let bannerData = {
+            fiscal: 'FY' + x[0].substring(1,3) + '–' + x[0].substring(3,5),
+            mmdd: x[1].substring(0,4),
+            language: x[2].substring(0,2),
+            country: x[2].substring(2,4),
+            device: x[3],
+            size: x[5],
+            testType: x[6],
+            testVariant: x[7]
+        }
+        if ( bannerName.includes('_m_') ) {
+            bannerData.device = 'm';
+        }
+        return bannerData;
+    }
+
+    /**
+     * Regex-based name parser. Gives less info but hopefully more reliable
+     * @param  {string} bannerName
+     * @return {object}
+     */
+    function newParseBannerName( bannerName ) {
+        let bannerData = {};
+        let langCountry = bannerName.match( /_([a-z]{2,})([A-Z]{2,})_/ );
+        if ( langCountry ) {
+            bannerData.language = langCountry[1];
+            bannerData.country = langCountry[2];
+        }
+        if ( bannerName.match( /_m_|_mob_|_ipd_/ ) ) {
+            bannerData.device = 'm';
+        } else {
+            bannerData.device = 'dsk';
+        }
+        return bannerData;
+    }
+
+    function editUrl( bannerName ) {
+        return 'https://meta.wikimedia.org/wiki/Special:CentralNoticeBanners/Edit/' + bannerName;
+    }
+
+    // TODO: allow specifying other options, split this out into a module
+    function previewUrl( bannerName, article ) {
+        var bannerData, url
+        try {
+            bannerData = newParseBannerName( bannerName );
+            url = 'https://';
+            if ( bannerData.language === undefined || bannerData.language === 'ml' ) {
+                url += 'en';
+            } else if ( bannerData.language === 'nb' ) {
+                url += 'no';
+            } else {
+                url += bannerData.language;
+            }
+
+            if ( bannerData.device === 'm' || bannerData.device === 'mob' || bannerData.device === 'ipd' ) {
+                url += '.m';
+            }
+
+            url += '.wikipedia.org/wiki/'
+            if ( article ) {
+                url += article;
+            }
+
+            url += '?country=';
+            if ( bannerData.country === undefined || bannerData.country === '6C' || bannerData.country === 'WW' ) {
+                url += 'GB';
+            } else if ( bannerData.country === 'LA' ) {
+                url += 'AR';
+            } else {
+                url += bannerData.country;
+            }
+            url += '&banner=' + bannerName;
+        } catch {
+            // Default
+            url = 'https://en.wikipedia.org/wiki/' + article + '?banner=' + bannerName;
+        }
+        return url;
+    }
+
+    var diffElement = document.getElementById('diff-element'),
+        statusElement = document.getElementById('status'),
+        urlParams = new URLSearchParams(window.location.search),
+        banner1 = urlParams.get('banner1'),
+        banner2 = urlParams.get('banner2'),
+        editLink = 'https://meta.wikimedia.org/wiki/Special:CentralNoticeBanners/Edit/',
+        apiEndpoint = 'https://meta.wikimedia.org/w/api.php',
+        params = 'origin=*&action=compare&format=json&prop=diff|size',
+        bannerPagePrefix = 'MediaWiki:Centralnotice-template-',
+        previewArticle = 'NASA',
+        previewSizeSelect = document.getElementById('preview-size-select'),
+        diffContent, fromSize, toSize, sizeChange;
+
+    var previewUrl1 = previewUrl( banner1, previewArticle ),
+        previewUrl2 = previewUrl( banner2, previewArticle );
+
+    params += '&fromtitle=' + bannerPagePrefix + banner1;
+    params += '&totitle=' + bannerPagePrefix + banner2;
+
+    document.getElementById( 'title-banner1' ).innerText = banner1;
+    document.getElementById( 'title-banner2' ).innerText = banner2;
+
+    document.getElementById( 'edit-banner1' ).setAttribute( 'href', editUrl( banner1 ) );
+    document.getElementById( 'edit-banner2' ).setAttribute( 'href', editUrl( banner2 ) );
+
+    document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
+    document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
+
+    if ( banner1 === banner2 ) {
+        statusElement.innerHTML = 'Those are the same banner!';
+        return;
+    }
+
+    console.log( apiEndpoint + '?' + params );
+
+    fetch( apiEndpoint + '?' + params )
+        .then(function(response) { return response.json(); } )
+        .then(function(response) {
+            try {
+                diffContent = response.compare['*'];
+                if ( diffContent.match(/<tr>/) ) {
+                    diffElement.innerHTML = diffContent;
+                    statusElement.remove();
+                } else {
+                    statusElement.innerHTML = 'No difference between banners.';
+                }
+                fromSize   = response.compare.fromsize;
+                toSize     = response.compare.tosize;
+                sizeChange = toSize - fromSize;
+                document.getElementById('size-banner1').innerText = fromSize.toLocaleString() + ' bytes';
+                document.getElementById('size-banner2').innerText = toSize.toLocaleString() + ' bytes';
+                document.getElementById('size-change').innerText =
+                    sizeChange.toLocaleString( undefined, { signDisplay: 'always' } );
+            } catch {
+                statusElement.innerHTML = 'Error getting diff. Do both banners exist?';
+            }
+        });
+    
+    document.getElementById( 'enable-live-preview' ).addEventListener( 'click', () => {
+        enableLivePreview();
+    });
+
+    document.getElementById( 'disable-live-preview' ).addEventListener( 'click', () => {
+        document.body.classList.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
+    });
+
+    previewSizeSelect.addEventListener( 'change', (e) => {
+        setPreviewSize( previewSizeSelect.value );
+    });
+
+    window.addEventListener( 'resize', (e) => {
+        setPreviewSize( previewSizeSelect.value );
+    });
+
+    // Set initial size
+    if( newParseBannerName( banner1 ).device === 'm' ) {
+        previewSizeSelect.value = '390x844';
+    } else {
+        previewSizeSelect.value = '1280x800';
+    }
+    setPreviewSize( previewSizeSelect.value );
+
+    document.getElementById( 'zoom-banner1' ).addEventListener( 'click', (e) => {
+        document.body.classList.toggle( 'zoomed-banner1' );
+    });
+    document.getElementById( 'zoom-banner2' ).addEventListener( 'click', (e) => {
+        document.body.classList.toggle( 'zoomed-banner2' );
+    });
+
+    function enableLivePreview() {
+        const previewFrame1 = document.getElementById( 'live-preview-banner1' );
+        const previewFrame2 = document.getElementById( 'live-preview-banner2' );
+
+        // Only do this if wasn't set already, to avoid repeated loads
+        if ( !previewFrame1.getAttribute( 'src' ) ) {
+            previewFrame1.setAttribute( 'src', previewUrl1 );
+            previewFrame2.setAttribute( 'src', previewUrl2 );
+        }
+        document.body.classList.add( 'live-preview-enabled' );
+        setPreviewSize( previewSizeSelect.value );
+    }
+
+    function setPreviewSize( sizeString ) {
+        const scaleLevels = [ 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1 ];
+        const screenWidth = window.innerWidth;
+        const availWidth = ( screenWidth / 2 ) - 40;
+        let width, height, scale, scaleZoomed;
+
+        [ width, height ] = sizeString.split('x');
+
+        for (let i = scaleLevels.length; i >= 0; i--) {
+            scale = scaleLevels[i];
+            if ( width * scale < availWidth ) {
+                break;
+            }
+        }
+        scaleZoomed = Math.min( scale * 2, 1 );
+        console.log( width, height, scale, scaleZoomed );
+
+        document.documentElement.style.cssText = `
+            --preview-width: ${width}px;
+            --preview-height: ${height}px;
+            --preview-scale: ${scale};
+            --preview-scale-zoomed: ${scaleZoomed};
+        `
+
+        document.getElementById('scale-amount').textContent = scale;
+        document.getElementById('scale-amount-zoomed').textContent = scaleZoomed;
+
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener( 'keydown', (e) => {
+        const keyName = e.key;
+        const bodyClasses = document.body.classList;
+        const livePreviewEnabled = bodyClasses.contains( 'live-preview-enabled' );
+        switch (keyName) {
+            case 'p':
+                enableLivePreview();
+                break;
+            case 'd':
+                bodyClasses.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
+                break;
+            case 'Escape':
+                bodyClasses.remove( 'zoomed-banner1', 'zoomed-banner2' );
+                break;
+            case 'r':
+                if ( livePreviewEnabled ) {
+                    previewSizeSelect.showPicker();
+                }
+                break;
+            case '1':
+                if ( livePreviewEnabled ) {
+                    bodyClasses.remove( 'zoomed-banner2' );
+                    bodyClasses.toggle( 'zoomed-banner1' );
+                }
+                break;
+            case '2':
+                if ( livePreviewEnabled ) {
+                    bodyClasses.remove( 'zoomed-banner1' );
+                    bodyClasses.toggle( 'zoomed-banner2' );
+                }
+                break;            
+            default:
+                break;
+        }
+
+    });
+
+})();
+</script>
+</body>
+</html>
