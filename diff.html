@@ -92,7 +92,15 @@
         .zoom-link { display: none; }
         .live-preview-enabled .zoom-link { display: inline; }
 
-        #live-preview-row { display: none; }
+        #live-preview-row { 
+            display: none;
+            height: calc(var(--preview-height) * var(--preview-scale));
+            margin-bottom: 40px;
+        }
+        .zoomed-banner1 #live-preview-row,
+        .zoomed-banner2 #live-preview-row {
+            height: calc(var(--preview-height) * var(--preview-scale-zoomed));
+        }
         .live-preview-enabled #live-preview-row { display: block; }
 
         #header-banner1,
