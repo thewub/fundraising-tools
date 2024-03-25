@@ -355,13 +355,13 @@
     }
 
     // TODO: split this out into a module
-    function previewUrl( bannerName, article, options = {} ) {
+    function previewUrl( bannerName, options = {} ) {
         var url;
 
         if ( options.device === 'm' ) {
-            url = `https://${options.language}.m.wikipedia.org/wiki/${article}?country=${options.country}&banner=${bannerName}`;
+            url = `https://${options.language}.m.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
         } else {
-            url = `https://${options.language}.wikipedia.org/wiki/${article}?country=${options.country}&banner=${bannerName}`;
+            url = `https://${options.language}.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
         }
 
         return url;
@@ -379,7 +379,6 @@
         previewOptions,
         languageSelect = document.getElementById('language-select'),
         countrySelect = document.getElementById('country-select'),
-        previewArticle = 'NASA',
         previewSizeSelect = document.getElementById('preview-size-select'),
         diffContent, fromSize, toSize, sizeChange;
 
@@ -402,6 +401,7 @@
     } else if ( previewOptions.country === 'LA' ) {
         previewOptions.country = 'AR';
     }
+    previewOptions.article = 'NASA';
 
     languageSelect.value = previewOptions.language;
     languageSelect.addEventListener( 'change', (e) => {
@@ -488,8 +488,8 @@
     function updatePreviewUrls() {
         console.log('updating preview urls');
 
-        var previewUrl1 = previewUrl( banner1, previewArticle, previewOptions ),
-            previewUrl2 = previewUrl( banner2, previewArticle, previewOptions );
+        var previewUrl1 = previewUrl( banner1, previewOptions ),
+            previewUrl2 = previewUrl( banner2, previewOptions );
 
         document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
         document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
