@@ -66,10 +66,10 @@
             pointer-events: none;
         }
 
-        .preview-settings {
+        .live-preview-settings {
             visibility: hidden;
         }
-        .live-preview-enabled .preview-settings {
+        .live-preview-enabled .live-preview-settings {
             visibility: visible;
         }
 
@@ -157,6 +157,12 @@
     <div id="settings">
         <a href="#" id="disable-live-preview">Diff (d)</a> / <a href="#" id="enable-live-preview">Preview (p)</a>
         <div class="preview-settings">
+            <label for="language-select">Language:</label>
+            <input id="language-select" type="text" size="2" />
+            <label for="country-select">Country:</label>
+            <input id="country-select" type="text" size="2" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+        <div class="live-preview-settings">
             <select id="preview-size-select">
                 <option value="345x883">345x883 - Galaxy Z Fold 5 (front)</option>
                 <option value="384x824">384x824 - Galaxy S22 Ultra</option>
@@ -324,14 +330,21 @@
      */
     function newParseBannerName( bannerName ) {
         let bannerData = {};
-        let langCountry = bannerName.match( /_([a-z]{2,})([A-Z]{2,})_/ );
-        if ( langCountry ) {
-            bannerData.language = langCountry[1];
-            bannerData.country = langCountry[2];
-        }
-        if ( bannerName.match( /_m_|_mob_|_ipd_/ ) ) {
-            bannerData.device = 'm';
-        } else {
+        try {
+            let langCountry = bannerName.match( /_([a-z]{2,})([0-9A-Z]{2,})_/ );
+            if ( langCountry ) {
+                bannerData.language = langCountry[1];
+                bannerData.country = langCountry[2];
+            }
+            if ( bannerName.match( /_m_|_mob_|_ipd_/ ) ) {
+                bannerData.device = 'm';
+            } else {
+                bannerData.device = 'dsk';
+            }
+        } catch {
+            console.warn('Error parsing banner name, using default values')
+            bannerData.language = 'en';
+            bannerData.country = 'GB';
             bannerData.device = 'dsk';
         }
         return bannerData;
@@ -341,42 +354,16 @@
         return 'https://meta.wikimedia.org/wiki/Special:CentralNoticeBanners/Edit/' + bannerName;
     }
 
-    // TODO: allow specifying other options, split this out into a module
-    function previewUrl( bannerName, article ) {
-        var bannerData, url
-        try {
-            bannerData = newParseBannerName( bannerName );
-            url = 'https://';
-            if ( bannerData.language === undefined || bannerData.language === 'ml' ) {
-                url += 'en';
-            } else if ( bannerData.language === 'nb' ) {
-                url += 'no';
-            } else {
-                url += bannerData.language;
-            }
+    // TODO: split this out into a module
+    function previewUrl( bannerName, article, options = {} ) {
+        var url;
 
-            if ( bannerData.device === 'm' || bannerData.device === 'mob' || bannerData.device === 'ipd' ) {
-                url += '.m';
-            }
-
-            url += '.wikipedia.org/wiki/'
-            if ( article ) {
-                url += article;
-            }
-
-            url += '?country=';
-            if ( bannerData.country === undefined || bannerData.country === '6C' || bannerData.country === 'WW' ) {
-                url += 'GB';
-            } else if ( bannerData.country === 'LA' ) {
-                url += 'AR';
-            } else {
-                url += bannerData.country;
-            }
-            url += '&banner=' + bannerName;
-        } catch {
-            // Default
-            url = 'https://en.wikipedia.org/wiki/' + article + '?banner=' + bannerName;
+        if ( options.device === 'm' ) {
+            url = `https://${options.language}.m.wikipedia.org/wiki/${article}?country=${options.country}&banner=${bannerName}`;
+        } else {
+            url = `https://${options.language}.wikipedia.org/wiki/${article}?country=${options.country}&banner=${bannerName}`;
         }
+
         return url;
     }
 
@@ -389,12 +376,12 @@
         apiEndpoint = 'https://meta.wikimedia.org/w/api.php',
         params = 'origin=*&action=compare&format=json&prop=diff|size',
         bannerPagePrefix = 'MediaWiki:Centralnotice-template-',
+        previewOptions,
+        languageSelect = document.getElementById('language-select'),
+        countrySelect = document.getElementById('country-select'),
         previewArticle = 'NASA',
         previewSizeSelect = document.getElementById('preview-size-select'),
         diffContent, fromSize, toSize, sizeChange;
-
-    var previewUrl1 = previewUrl( banner1, previewArticle ),
-        previewUrl2 = previewUrl( banner2, previewArticle );
 
     params += '&fromtitle=' + bannerPagePrefix + banner1;
     params += '&totitle=' + bannerPagePrefix + banner2;
@@ -404,6 +391,31 @@
 
     document.getElementById( 'edit-banner1' ).setAttribute( 'href', editUrl( banner1 ) );
     document.getElementById( 'edit-banner2' ).setAttribute( 'href', editUrl( banner2 ) );
+
+    // Get initial preview options
+    previewOptions = newParseBannerName( banner2 );
+    if ( previewOptions.language === 'ml' ) {
+        previewOptions.language = 'en';
+    }
+    if ( previewOptions.country === '6C' || previewOptions.country === 'WW' ) {
+        previewOptions.country = 'GB'
+    } else if ( previewOptions.country === 'LA' ) {
+        previewOptions.country = 'AR';
+    }
+
+    languageSelect.value = previewOptions.language;
+    languageSelect.addEventListener( 'change', (e) => {
+        previewOptions.language = languageSelect.value;
+        updatePreviewUrls();
+    });
+    
+    countrySelect.value = previewOptions.country;
+    countrySelect.addEventListener( 'change', (e) => {
+        previewOptions.country = countrySelect.value;
+        updatePreviewUrls();
+    });
+
+    console.log( previewOptions );
 
     updatePreviewUrls();
 
@@ -454,7 +466,7 @@
     });
 
     // Set initial size
-    if( newParseBannerName( banner1 ).device === 'm' ) {
+    if ( previewOptions.device === 'm' ) {
         previewSizeSelect.value = '390x844';
     } else {
         previewSizeSelect.value = '1280x720';
@@ -474,6 +486,11 @@
     });
 
     function updatePreviewUrls() {
+        console.log('updating preview urls');
+
+        var previewUrl1 = previewUrl( banner1, previewArticle, previewOptions ),
+            previewUrl2 = previewUrl( banner2, previewArticle, previewOptions );
+
         document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
         document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
 
