@@ -405,8 +405,7 @@
     document.getElementById( 'edit-banner1' ).setAttribute( 'href', editUrl( banner1 ) );
     document.getElementById( 'edit-banner2' ).setAttribute( 'href', editUrl( banner2 ) );
 
-    document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
-    document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
+    updatePreviewUrls();
 
     if ( banner1 === banner2 ) {
         statusElement.innerHTML = 'Those are the same banner!';
@@ -474,16 +473,27 @@
         document.body.classList.add( 'zoomed-banner2' );
     });
 
-    function enableLivePreview() {
-        const previewFrame1 = document.getElementById( 'live-preview-banner1' );
-        const previewFrame2 = document.getElementById( 'live-preview-banner2' );
+    function updatePreviewUrls() {
+        document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
+        document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
 
-        // Only do this if wasn't set already, to avoid repeated loads
-        if ( !previewFrame1.getAttribute( 'src' ) ) {
-            previewFrame1.setAttribute( 'src', previewUrl1 );
-            previewFrame2.setAttribute( 'src', previewUrl2 );
+        if ( document.body.classList.contains( 'live-preview-enabled' ) ) {
+            const previewFrame1 = document.getElementById( 'live-preview-banner1' );
+            const previewFrame2 = document.getElementById( 'live-preview-banner2' );
+
+            // Only do this if wasn't set already, to avoid repeated loads
+            if ( previewFrame1.getAttribute( 'src' ) !== previewUrl1 ) {
+                previewFrame1.setAttribute( 'src', previewUrl1 );
+            }
+            if ( previewFrame2.getAttribute( 'src' ) !== previewUrl2 ) {
+                previewFrame2.setAttribute( 'src', previewUrl2 );
+            }
         }
+    }
+
+    function enableLivePreview() {
         document.body.classList.add( 'live-preview-enabled' );
+        updatePreviewUrls();
         setPreviewSize( previewSizeSelect.value );
     }
 
