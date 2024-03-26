@@ -363,6 +363,11 @@
     function previewUrl( bannerName, options = {} ) {
         var url;
 
+        // Norwegian is weird, language code is nb but wiki is at no.wikipedia.org
+        if ( options.language === 'nb' ) {
+            options.language = 'no';
+        }
+
         if ( options.device === 'm' ) {
             url = `https://${options.language}.m.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
         } else {
