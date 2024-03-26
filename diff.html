@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
     <title>Banner diff tool</title>
     <link rel="stylesheet" href="https://www.mediawiki.org/w/load.php?modules=mediawiki.diff.styles&only=styles">
@@ -15,46 +15,55 @@
             --preview-height: auto;
             --preview-scale: 1;
             --preview-scale-zoomed: 1;
+        }
+
+        /* Default MediaWiki styles */
+        [data-theme="light"] {
             --color-base: #fff;
             --color-text: #000;
             --color-accent: #36c;
             --color-accent-2: #447ff5;
+            --color-surface-0: #f8f9fa;
+            --color-surface-1: #eee;
+            --color-subtext-0: #222;
+            --color-yellow: #ffe49c;
+            --color-sapphire: #d8ecff;
+            --color-text-highlighted: var(--color-text);
+        }
+        
+        /* Dark colors from Catppuccin Machiatto https://catppuccin.ryanccn.dev/palette */
+        [data-theme="dark"] {
+            --color-base: #24273a;
+            --color-text: #cad3f5;
+            --color-accent: #8aadf4;
+            --color-accent-2: #447ff5;
+            --color-surface-0: #363a4f;
+            --color-surface-1: #494d64;
+            --color-subtext-0: #b8c0e0;
+            --color-yellow: #eed49f;
+            --color-sapphire: #7dc4e4;
+            --color-text-highlighted: var(--color-base);
         }
 
-        /* Dark colors from Catppuccin Machiatto https://catppuccin.ryanccn.dev/palette */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color-base: #24273a;
-                --color-text: #cad3f5;
-                --color-accent: #8aadf4;
-                --color-accent-2: #447ff5;
-                --color-surface-0: #363a4f;
-                --color-surface-1: #494d64;
-                --color-subtext-0: #b8c0e0;
-                --color-yellow: #eed49f;
-                --color-sapphire: #7dc4e4;
-            }
-
-            .diff-context {
-                background: var(--color-surface-0);
-                border-color: var(--color-surface-1);
-                color: var(--color-subtext-0);
-            }
-            .diff-deletedline {
-                border-color: var(--color-yellow);
-            }
-            .diff-deletedline .diffchange {
-                background: var(--color-yellow);
-            }
-            .diff-addedline {
-                border-color: var(--color-sapphire);
-            }
-            .diff-addedline .diffchange {
-                background: var(--color-sapphire);
-            }
-            .diffchange {
-                color: var(--color-base);
-            }
+        .diff-context {
+            background: var(--color-surface-0);
+            border-color: var(--color-surface-1);
+            color: var(--color-subtext-0);
+        }
+        .diff-deletedline {
+            border-color: var(--color-yellow);
+        }
+        .diff-deletedline .diffchange {
+            background: var(--color-yellow);
+        }
+        .diff-addedline {
+            border-color: var(--color-sapphire);
+        }
+        .diff-addedline .diffchange {
+            background: var(--color-sapphire);
+        }
+        .diffchange {
+            color: var(--color-text-highlighted);
         }
 
         body {
