@@ -166,6 +166,8 @@
             <input id="language-select" type="text" size="2" />
             <label for="country-select">Country:</label>
             <input id="country-select" type="text" size="2" oninput="this.value = this.value.toUpperCase()" />
+            <label for="force-apple-pay">Force Apple Pay</label>
+            <input id="force-apple-pay" type="checkbox" />
         </div>
         <div class="live-preview-settings">
             <select id="preview-size-select">
@@ -374,6 +376,10 @@
             url = `https://${options.language}.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
         }
 
+        if ( options.forceApplePay ) {
+            url += '&forceApplePay=1';
+        }
+
         return url;
     }
 
@@ -422,6 +428,11 @@
     countrySelect.value = previewOptions.country;
     countrySelect.addEventListener( 'change', (e) => {
         previewOptions.country = countrySelect.value;
+        updatePreviewUrls();
+    });
+
+    document.getElementById( 'force-apple-pay' ).addEventListener( 'change', (e) => {
+        previewOptions.forceApplePay = e.target.checked;
         updatePreviewUrls();
     });
 
