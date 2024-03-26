@@ -67,9 +67,20 @@
         }
 
         .preview-settings {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 4px 0;
+        }
+
+        input:disabled+label {
+            opacity: 0.4;
+        }
+
+        .live-preview-settings {
             visibility: hidden;
         }
-        .live-preview-enabled .preview-settings {
+        .live-preview-enabled .live-preview-settings {
             visibility: visible;
         }
 
@@ -157,6 +168,25 @@
     <div id="settings">
         <a href="#" id="disable-live-preview">Diff (d)</a> / <a href="#" id="enable-live-preview">Preview (p)</a>
         <div class="preview-settings">
+            <strong>Preview settings:</strong>
+            <span>
+                <label for="language-select">Language</label>
+                <input id="language-select" type="text" size="2" />
+            </span>
+            <span>
+                <label for="country-select">Country</label>
+                <input id="country-select" type="text" size="2" oninput="this.value = this.value.toUpperCase()" />
+            </span>
+            <span>
+                <input id="force-apple-pay" type="checkbox" />
+                <label for="force-apple-pay">Force Apple Pay</label>
+            </span>
+            <span>
+                <input id="preview-night-mode" type="checkbox" />
+                <label for="preview-night-mode">Night mode</label>
+            </span>
+        </div>
+        <div class="live-preview-settings">
             <select id="preview-size-select">
                 <option value="345x883">345x883 - Galaxy Z Fold 5 (front)</option>
                 <option value="384x824">384x824 - Galaxy S22 Ultra</option>
@@ -324,14 +354,21 @@
      */
     function newParseBannerName( bannerName ) {
         let bannerData = {};
-        let langCountry = bannerName.match( /_([a-z]{2,})([A-Z]{2,})_/ );
-        if ( langCountry ) {
-            bannerData.language = langCountry[1];
-            bannerData.country = langCountry[2];
-        }
-        if ( bannerName.match( /_m_|_mob_|_ipd_/ ) ) {
-            bannerData.device = 'm';
-        } else {
+        try {
+            let langCountry = bannerName.match( /_([a-z]{2,})([0-9A-Z]{2,})_/ );
+            if ( langCountry ) {
+                bannerData.language = langCountry[1];
+                bannerData.country = langCountry[2];
+            }
+            if ( bannerName.match( /_m_|_mob_|_ipd_/ ) ) {
+                bannerData.device = 'm';
+            } else {
+                bannerData.device = 'dsk';
+            }
+        } catch {
+            console.warn('Error parsing banner name, using default values')
+            bannerData.language = 'en';
+            bannerData.country = 'GB';
             bannerData.device = 'dsk';
         }
         return bannerData;
@@ -341,42 +378,28 @@
         return 'https://meta.wikimedia.org/wiki/Special:CentralNoticeBanners/Edit/' + bannerName;
     }
 
-    // TODO: allow specifying other options, split this out into a module
-    function previewUrl( bannerName, article ) {
-        var bannerData, url
-        try {
-            bannerData = newParseBannerName( bannerName );
-            url = 'https://';
-            if ( bannerData.language === undefined || bannerData.language === 'ml' ) {
-                url += 'en';
-            } else if ( bannerData.language === 'nb' ) {
-                url += 'no';
-            } else {
-                url += bannerData.language;
-            }
+    // TODO: split this out into a module
+    function previewUrl( bannerName, options = {} ) {
+        var url;
 
-            if ( bannerData.device === 'm' || bannerData.device === 'mob' || bannerData.device === 'ipd' ) {
-                url += '.m';
-            }
-
-            url += '.wikipedia.org/wiki/'
-            if ( article ) {
-                url += article;
-            }
-
-            url += '?country=';
-            if ( bannerData.country === undefined || bannerData.country === '6C' || bannerData.country === 'WW' ) {
-                url += 'GB';
-            } else if ( bannerData.country === 'LA' ) {
-                url += 'AR';
-            } else {
-                url += bannerData.country;
-            }
-            url += '&banner=' + bannerName;
-        } catch {
-            // Default
-            url = 'https://en.wikipedia.org/wiki/' + article + '?banner=' + bannerName;
+        // Norwegian is weird, language code is nb but wiki is at no.wikipedia.org
+        if ( options.language === 'nb' ) {
+            options.language = 'no';
         }
+
+        if ( options.device === 'm' ) {
+            url = `https://${options.language}.m.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
+        } else {
+            url = `https://${options.language}.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
+        }
+
+        if ( options.forceApplePay ) {
+            url += '&forceApplePay=1';
+        }
+        if ( options.nightMode && options.device === 'm' ) {
+            url += '&minervanightmode=1';
+        }
+
         return url;
     }
 
@@ -389,12 +412,11 @@
         apiEndpoint = 'https://meta.wikimedia.org/w/api.php',
         params = 'origin=*&action=compare&format=json&prop=diff|size',
         bannerPagePrefix = 'MediaWiki:Centralnotice-template-',
-        previewArticle = 'NASA',
+        previewOptions,
+        languageSelect = document.getElementById('language-select'),
+        countrySelect = document.getElementById('country-select'),
         previewSizeSelect = document.getElementById('preview-size-select'),
         diffContent, fromSize, toSize, sizeChange;
-
-    var previewUrl1 = previewUrl( banner1, previewArticle ),
-        previewUrl2 = previewUrl( banner2, previewArticle );
 
     params += '&fromtitle=' + bannerPagePrefix + banner1;
     params += '&totitle=' + bannerPagePrefix + banner2;
@@ -405,8 +427,47 @@
     document.getElementById( 'edit-banner1' ).setAttribute( 'href', editUrl( banner1 ) );
     document.getElementById( 'edit-banner2' ).setAttribute( 'href', editUrl( banner2 ) );
 
-    document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
-    document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
+    // Get initial preview options
+    previewOptions = newParseBannerName( banner2 );
+    if ( previewOptions.language === 'ml' ) {
+        previewOptions.language = 'en';
+    }
+    if ( previewOptions.country === '6C' || previewOptions.country === 'WW' ) {
+        previewOptions.country = 'GB'
+    } else if ( previewOptions.country === 'LA' ) {
+        previewOptions.country = 'AR';
+    }
+    previewOptions.article = 'NASA';
+
+    languageSelect.value = previewOptions.language;
+    languageSelect.addEventListener( 'change', (e) => {
+        previewOptions.language = languageSelect.value;
+        updatePreviewUrls();
+    });
+    
+    countrySelect.value = previewOptions.country;
+    countrySelect.addEventListener( 'change', (e) => {
+        previewOptions.country = countrySelect.value;
+        updatePreviewUrls();
+    });
+
+    document.getElementById( 'force-apple-pay' ).addEventListener( 'change', (e) => {
+        previewOptions.forceApplePay = e.target.checked;
+        updatePreviewUrls();
+    });
+
+    // Only available on mobile for now
+    if ( previewOptions.device !== 'm' ) {
+        document.getElementById( 'preview-night-mode' ).disabled = true;
+    }
+    document.getElementById( 'preview-night-mode' ).addEventListener( 'change', (e) => {
+        previewOptions.nightMode = e.target.checked;
+        updatePreviewUrls();
+    });
+
+    console.log( previewOptions );
+
+    updatePreviewUrls();
 
     if ( banner1 === banner2 ) {
         statusElement.innerHTML = 'Those are the same banner!';
@@ -455,7 +516,7 @@
     });
 
     // Set initial size
-    if( newParseBannerName( banner1 ).device === 'm' ) {
+    if ( previewOptions.device === 'm' ) {
         previewSizeSelect.value = '390x844';
     } else {
         previewSizeSelect.value = '1280x720';
@@ -474,16 +535,32 @@
         document.body.classList.add( 'zoomed-banner2' );
     });
 
-    function enableLivePreview() {
-        const previewFrame1 = document.getElementById( 'live-preview-banner1' );
-        const previewFrame2 = document.getElementById( 'live-preview-banner2' );
+    function updatePreviewUrls() {
+        console.log('updating preview urls');
 
-        // Only do this if wasn't set already, to avoid repeated loads
-        if ( !previewFrame1.getAttribute( 'src' ) ) {
-            previewFrame1.setAttribute( 'src', previewUrl1 );
-            previewFrame2.setAttribute( 'src', previewUrl2 );
+        var previewUrl1 = previewUrl( banner1, previewOptions ),
+            previewUrl2 = previewUrl( banner2, previewOptions );
+
+        document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
+        document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
+
+        if ( document.body.classList.contains( 'live-preview-enabled' ) ) {
+            const previewFrame1 = document.getElementById( 'live-preview-banner1' );
+            const previewFrame2 = document.getElementById( 'live-preview-banner2' );
+
+            // Only do this if wasn't set already, to avoid repeated loads
+            if ( previewFrame1.getAttribute( 'src' ) !== previewUrl1 ) {
+                previewFrame1.setAttribute( 'src', previewUrl1 );
+            }
+            if ( previewFrame2.getAttribute( 'src' ) !== previewUrl2 ) {
+                previewFrame2.setAttribute( 'src', previewUrl2 );
+            }
         }
+    }
+
+    function enableLivePreview() {
         document.body.classList.add( 'live-preview-enabled' );
+        updatePreviewUrls();
         setPreviewSize( previewSizeSelect.value );
     }
 
@@ -518,6 +595,11 @@
 
     // Keyboard shortcuts
     document.addEventListener( 'keydown', (e) => {
+
+        if ( e.target.tagName === 'INPUT' ) {
+            return false;
+        }
+
         const keyName = e.key;
         const bodyClasses = document.body.classList;
         const livePreviewEnabled = bodyClasses.contains( 'live-preview-enabled' );
