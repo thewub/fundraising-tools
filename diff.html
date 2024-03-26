@@ -550,6 +550,11 @@
 
     // Keyboard shortcuts
     document.addEventListener( 'keydown', (e) => {
+
+        if ( e.target.tagName === 'INPUT' ) {
+            return false;
+        }
+
         const keyName = e.key;
         const bodyClasses = document.body.classList;
         const livePreviewEnabled = bodyClasses.contains( 'live-preview-enabled' );
