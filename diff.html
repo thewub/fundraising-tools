@@ -220,9 +220,40 @@
             display: none;
             /* left: -25%; */
         }
+
+        .night-mode-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px;
+            margin: 8px;
+            border: 0;
+            border-radius: 50%;
+            display: flex;
+            cursor: pointer;
+            color: var(--color-yellow);
+            background: #6e738d;
+        }
+        .night-mode-toggle:hover {
+            filter: brightness(1.2);
+        }
+        .night-mode-toggle svg {
+            fill: currentColor;
+        }
+
+        [data-theme="light"] #night-mode-off,
+        [data-theme="dark"] #night-mode-on {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <button id="night-mode-off" class="night-mode-toggle">
+        <svg id="night-mode-off-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><g><path d="M17.07 7.07V2.93h-4.14L10 0 7.07 2.93H2.93v4.14L0 10l2.93 2.93v4.14h4.14L10 20l2.93-2.93h4.14v-4.14L20 10zM10 16a6 6 0 116-6 6 6 0 01-6 6"></path><circle cx="10" cy="10" r="4.5"></circle></g></svg>
+    </button>
+    <button id="night-mode-on" class="night-mode-toggle">
+        <svg id="night-mode-on-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><g><path d="M17.39 15.14A7.33 7.33 0 0111.75 1.6c.23-.11.56-.23.79-.34a8.2 8.2 0 00-5.41.45 9 9 0 107 16.58 8.42 8.42 0 004.29-3.84 5.3 5.3 0 01-1.03.69"></path></g></svg>
+    </button>
     <div id="settings">
         <a href="#" id="disable-live-preview">Diff (d)</a> / <a href="#" id="enable-live-preview">Preview (p)</a>
         <div class="preview-settings">
@@ -694,6 +725,15 @@
         }
 
     });
+
+    /* Night mode */
+    document.getElementById('night-mode-on').addEventListener( 'click', function() {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    });
+    document.getElementById('night-mode-off').addEventListener( 'click', function() {
+        document.documentElement.setAttribute('data-theme', 'light');
+    });
+
 
 })();
 </script>
