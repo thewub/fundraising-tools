@@ -15,18 +15,61 @@
             --preview-height: auto;
             --preview-scale: 1;
             --preview-scale-zoomed: 1;
+            --color-base: #fff;
+            --color-text: #000;
+            --color-accent: #36c;
+            --color-accent-2: #447ff5;
         }
+
+        /* Dark colors from Catppuccin Machiatto https://catppuccin.ryanccn.dev/palette */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-base: #24273a;
+                --color-text: #cad3f5;
+                --color-accent: #8aadf4;
+                --color-accent-2: #447ff5;
+                --color-surface-0: #363a4f;
+                --color-surface-1: #494d64;
+                --color-subtext-0: #b8c0e0;
+                --color-yellow: #eed49f;
+                --color-sapphire: #7dc4e4;
+            }
+
+            .diff-context {
+                background: var(--color-surface-0);
+                border-color: var(--color-surface-1);
+                color: var(--color-subtext-0);
+            }
+            .diff-deletedline {
+                border-color: var(--color-yellow);
+            }
+            .diff-deletedline .diffchange {
+                background: var(--color-yellow);
+            }
+            .diff-addedline {
+                border-color: var(--color-sapphire);
+            }
+            .diff-addedline .diffchange {
+                background: var(--color-sapphire);
+            }
+            .diffchange {
+                color: var(--color-base);
+            }
+        }
+
         body {
             font-family: sans-serif;
             overflow-y: scroll;
             text-align: center;
             line-height: 1.4;
+            background: var(--color-base);
+            color: var(--color-text);
         }
         a {
-            color: #36c;
+            color: var(--color-accent);
         }
         a:hover {
-            color: #447ff5;
+            color: var(--color-accent-2);
         }
 
         #settings a,
@@ -36,6 +79,12 @@
 
         #settings {
             margin-bottom: 1em;
+        }
+
+        #settings input[type="text"] {
+            background: var(--color-surface-0);
+            color: var(--color-text);
+            border: 1px solid;
         }
 
         .diff {
@@ -61,7 +110,7 @@
         .zoomed-banner1 #zoom-banner1,
         .zoomed-banner2 #zoom-banner2 {
             color: #fff;
-            background-color: #36c;
+            background-color: var(--color-accent);
             text-decoration: none;
             pointer-events: none;
         }
