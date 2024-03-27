@@ -726,14 +726,27 @@
 
     });
 
-    /* Light/dark themes */
+    function setTheme( theme ) {
+        document.documentElement.setAttribute( 'data-theme', theme );
+    }
+
     document.getElementById('enable-dark-theme').addEventListener( 'click', function() {
-        document.documentElement.setAttribute('data-theme', 'dark');
+        setTheme( 'dark' );
+        localStorage.setItem( 'theme', 'dark' );
     });
     document.getElementById('enable-light-theme').addEventListener( 'click', function() {
-        document.documentElement.setAttribute('data-theme', 'light');
+        setTheme( 'light' );
+        localStorage.setItem( 'theme', 'light' );
     });
 
+    var localStorageTheme = localStorage.getItem( 'theme' );
+    if ( localStorageTheme ) {
+        setTheme( localStorageTheme );
+    } else if ( window.matchMedia( '(prefers-color-scheme: dark)' ).matches ) {
+        setTheme( 'dark' );
+    } else if ( window.matchMedia( '(prefers-color-scheme: light)' ).matches ) {
+        setTheme( 'light' );
+    }
 
 })();
 </script>
