@@ -555,16 +555,12 @@
         updatePreviewUrls();
     });
 
-    console.log( previewOptions );
-
     updatePreviewUrls();
 
     if ( banner1 === banner2 ) {
         statusElement.innerHTML = 'Those are the same banner!';
         return;
     }
-
-    console.log( apiEndpoint + '?' + params );
 
     fetch( apiEndpoint + '?' + params )
         .then(function(response) { return response.json(); } )
@@ -626,7 +622,6 @@
     });
 
     function updatePreviewUrls() {
-        console.log('updating preview urls');
 
         var previewUrl1 = previewUrl( banner1, previewOptions ),
             previewUrl2 = previewUrl( banner2, previewOptions );
@@ -669,7 +664,6 @@
             }
         }
         scaleZoomed = Math.min( scale * 2, 1 );
-        console.log( width, height, scale, scaleZoomed );
 
         document.documentElement.style.cssText = `
             --preview-width: ${width}px;
