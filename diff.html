@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
     <title>Banner diff tool</title>
     <link rel="stylesheet" href="https://www.mediawiki.org/w/load.php?modules=mediawiki.diff.styles&only=styles">
@@ -16,17 +16,69 @@
             --preview-scale: 1;
             --preview-scale-zoomed: 1;
         }
+
+        /* Default MediaWiki styles */
+        [data-theme="light"] {
+            --color-base: #fff;
+            --color-text: #000;
+            --color-accent: #36c;
+            --color-accent-2: #447ff5;
+            --color-surface-0: #f8f9fa;
+            --color-surface-1: #eee;
+            --color-subtext-0: #222;
+            --color-yellow: #ffe49c;
+            --color-sapphire: #d8ecff;
+            --color-text-highlighted: var(--color-text);
+        }
+        
+        /* Dark colors from Catppuccin Machiatto https://catppuccin.ryanccn.dev/palette */
+        [data-theme="dark"] {
+            --color-base: #24273a;
+            --color-text: #cad3f5;
+            --color-accent: #8aadf4;
+            --color-accent-2: #447ff5;
+            --color-surface-0: #363a4f;
+            --color-surface-1: #494d64;
+            --color-subtext-0: #b8c0e0;
+            --color-yellow: #eed49f;
+            --color-sapphire: #7dc4e4;
+            --color-text-highlighted: var(--color-base);
+        }
+
+        .diff-context {
+            background: var(--color-surface-0);
+            border-color: var(--color-surface-1);
+            color: var(--color-subtext-0);
+        }
+        .diff-deletedline {
+            border-color: var(--color-yellow);
+        }
+        .diff-deletedline .diffchange {
+            background: var(--color-yellow);
+        }
+        .diff-addedline {
+            border-color: var(--color-sapphire);
+        }
+        .diff-addedline .diffchange {
+            background: var(--color-sapphire);
+        }
+        .diffchange {
+            color: var(--color-text-highlighted);
+        }
+
         body {
             font-family: sans-serif;
             overflow-y: scroll;
             text-align: center;
             line-height: 1.4;
+            background: var(--color-base);
+            color: var(--color-text);
         }
         a {
-            color: #36c;
+            color: var(--color-accent);
         }
         a:hover {
-            color: #447ff5;
+            color: var(--color-accent-2);
         }
 
         #settings a,
@@ -36,6 +88,12 @@
 
         #settings {
             margin-bottom: 1em;
+        }
+
+        #settings input[type="text"] {
+            background: var(--color-surface-0);
+            color: var(--color-text);
+            border: 1px solid;
         }
 
         .diff {
@@ -61,7 +119,7 @@
         .zoomed-banner1 #zoom-banner1,
         .zoomed-banner2 #zoom-banner2 {
             color: #fff;
-            background-color: #36c;
+            background-color: var(--color-accent);
             text-decoration: none;
             pointer-events: none;
         }
@@ -162,9 +220,40 @@
             display: none;
             /* left: -25%; */
         }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px;
+            margin: 8px;
+            border: 0;
+            border-radius: 50%;
+            display: flex;
+            cursor: pointer;
+            color: var(--color-yellow);
+            background: #6e738d;
+        }
+        .theme-toggle:hover {
+            filter: brightness(1.2);
+        }
+        .theme-toggle svg {
+            fill: currentColor;
+        }
+
+        [data-theme="light"] #enable-light-theme,
+        [data-theme="dark"] #enable-dark-theme {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <button id="enable-light-theme" class="theme-toggle" aria-label="Light theme">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><g><path d="M17.07 7.07V2.93h-4.14L10 0 7.07 2.93H2.93v4.14L0 10l2.93 2.93v4.14h4.14L10 20l2.93-2.93h4.14v-4.14L20 10zM10 16a6 6 0 116-6 6 6 0 01-6 6"></path><circle cx="10" cy="10" r="4.5"></circle></g></svg>
+    </button>
+    <button id="enable-dark-theme" class="theme-toggle" aria-label="Dark theme">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><g><path d="M17.39 15.14A7.33 7.33 0 0111.75 1.6c.23-.11.56-.23.79-.34a8.2 8.2 0 00-5.41.45 9 9 0 107 16.58 8.42 8.42 0 004.29-3.84 5.3 5.3 0 01-1.03.69"></path></g></svg>
+    </button>
     <div id="settings">
         <a href="#" id="disable-live-preview">Diff (d)</a> / <a href="#" id="enable-live-preview">Preview (p)</a>
         <div class="preview-settings">
@@ -636,6 +725,28 @@
         }
 
     });
+
+    function setTheme( theme ) {
+        document.documentElement.setAttribute( 'data-theme', theme );
+    }
+
+    document.getElementById('enable-dark-theme').addEventListener( 'click', function() {
+        setTheme( 'dark' );
+        localStorage.setItem( 'theme', 'dark' );
+    });
+    document.getElementById('enable-light-theme').addEventListener( 'click', function() {
+        setTheme( 'light' );
+        localStorage.setItem( 'theme', 'light' );
+    });
+
+    var localStorageTheme = localStorage.getItem( 'theme' );
+    if ( localStorageTheme ) {
+        setTheme( localStorageTheme );
+    } else if ( window.matchMedia( '(prefers-color-scheme: dark)' ).matches ) {
+        setTheme( 'dark' );
+    } else if ( window.matchMedia( '(prefers-color-scheme: light)' ).matches ) {
+        setTheme( 'light' );
+    }
 
 })();
 </script>
