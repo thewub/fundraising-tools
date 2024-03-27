@@ -492,7 +492,8 @@
         return url;
     }
 
-    var diffElement = document.getElementById('diff-element'),
+    var bodyClasses = document.body.classList,
+        diffElement = document.getElementById('diff-element'),
         statusElement = document.getElementById('status'),
         urlParams = new URLSearchParams(window.location.search),
         banner1 = urlParams.get('banner1'),
@@ -593,7 +594,7 @@
     });
 
     document.getElementById( 'disable-live-preview' ).addEventListener( 'click', () => {
-        document.body.classList.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
+        bodyClasses.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
     });
 
     previewSizeSelect.addEventListener( 'change', (e) => {
@@ -613,15 +614,15 @@
     setPreviewSize( previewSizeSelect.value );
 
     document.getElementById( 'zoom-both' ).addEventListener( 'click', (e) => {
-        document.body.classList.remove( 'zoomed-banner1', 'zoomed-banner2' );
+        bodyClasses.remove( 'zoomed-banner1', 'zoomed-banner2' );
     });
     document.getElementById( 'zoom-banner1' ).addEventListener( 'click', (e) => {
-        document.body.classList.remove( 'zoomed-banner2' );
-        document.body.classList.add( 'zoomed-banner1' );
+        bodyClasses.remove( 'zoomed-banner2' );
+        bodyClasses.add( 'zoomed-banner1' );
     });
     document.getElementById( 'zoom-banner2' ).addEventListener( 'click', (e) => {
-        document.body.classList.remove( 'zoomed-banner1' );
-        document.body.classList.add( 'zoomed-banner2' );
+        bodyClasses.remove( 'zoomed-banner1' );
+        bodyClasses.add( 'zoomed-banner2' );
     });
 
     function updatePreviewUrls() {
@@ -633,7 +634,7 @@
         document.getElementById( 'preview-banner1' ).setAttribute( 'href', previewUrl1 );
         document.getElementById( 'preview-banner2' ).setAttribute( 'href', previewUrl2 );
 
-        if ( document.body.classList.contains( 'live-preview-enabled' ) ) {
+        if ( bodyClasses.contains( 'live-preview-enabled' ) ) {
             const previewFrame1 = document.getElementById( 'live-preview-banner1' );
             const previewFrame2 = document.getElementById( 'live-preview-banner2' );
 
@@ -648,7 +649,7 @@
     }
 
     function enableLivePreview() {
-        document.body.classList.add( 'live-preview-enabled' );
+        bodyClasses.add( 'live-preview-enabled' );
         updatePreviewUrls();
         setPreviewSize( previewSizeSelect.value );
     }
@@ -690,7 +691,6 @@
         }
 
         const keyName = e.key;
-        const bodyClasses = document.body.classList;
         const livePreviewEnabled = bodyClasses.contains( 'live-preview-enabled' );
         switch (keyName) {
             case 'p':
