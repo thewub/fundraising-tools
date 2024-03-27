@@ -732,14 +732,14 @@
 
     document.getElementById('enable-dark-theme').addEventListener( 'click', function() {
         setTheme( 'dark' );
-        localStorage.setItem( 'theme', 'dark' );
+        localStorage.setItem( 'diffTheme', 'dark' );
     });
     document.getElementById('enable-light-theme').addEventListener( 'click', function() {
         setTheme( 'light' );
-        localStorage.setItem( 'theme', 'light' );
+        localStorage.setItem( 'diffTheme', 'light' );
     });
 
-    var localStorageTheme = localStorage.getItem( 'theme' );
+    var localStorageTheme = localStorage.getItem( 'diffTheme' );
     if ( localStorageTheme ) {
         setTheme( localStorageTheme );
     } else if ( window.matchMedia( '(prefers-color-scheme: dark)' ).matches ) {
