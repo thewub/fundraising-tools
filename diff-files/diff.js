@@ -175,7 +175,7 @@
     document.getElementById( 'edit-banner2' ).setAttribute( 'href', editUrl( banner2 ) );
 
     // Get initial preview options
-    previewOptions = newParseBannerName( banner2 );
+    previewOptions = newParseBannerName( banner1 );
     if ( previewOptions.language === 'ml' ) {
         previewOptions.language = 'en';
     }
