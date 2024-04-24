@@ -135,6 +135,13 @@ input:disabled+label {
     visibility: visible;
 }
 
+.refresh-preview {
+    display: none;
+}
+.live-preview-enabled .refresh-preview {
+    display: inline;
+}
+
 .scale {
     display: inline-block;
     font-size: small;

@@ -278,6 +278,13 @@
         bodyClasses.add( 'zoomed-banner2' );
     });
 
+    document.getElementById( 'refresh-banner1' ).addEventListener( 'click', (e) => {
+        document.getElementById('live-preview-banner1').src = document.getElementById('live-preview-banner1').src;
+    });
+    document.getElementById( 'refresh-banner2' ).addEventListener( 'click', (e) => {
+        document.getElementById('live-preview-banner2').src = document.getElementById('live-preview-banner2').src;
+    });
+
     function updatePreviewUrls() {
 
         var previewUrl1 = previewUrl( banner1, previewOptions ),
