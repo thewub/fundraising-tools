@@ -142,8 +142,12 @@
         if ( options.forceApplePay ) {
             url += '&forceApplePay=1';
         }
-        if ( options.nightMode && options.device === 'm' ) {
-            url += '&minervanightmode=1';
+        if ( options.nightMode ) {
+            if ( options.device === 'm' ) {
+                url += '&minervanightmode=1';
+            } else {
+                url += '&vectornightmode=1';
+            }
         }
 
         return url;
@@ -203,10 +207,6 @@
         updatePreviewUrls();
     });
 
-    // Only available on mobile for now
-    if ( previewOptions.device !== 'm' ) {
-        document.getElementById( 'preview-night-mode' ).disabled = true;
-    }
     document.getElementById( 'preview-night-mode' ).addEventListener( 'change', (e) => {
         previewOptions.nightMode = e.target.checked;
         updatePreviewUrls();
