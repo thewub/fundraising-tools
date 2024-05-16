@@ -111,7 +111,7 @@
             } else {
                 bannerData.device = 'dsk';
             }
-        } catch {
+        } catch(e) {
             console.warn('Error parsing banner name, using default values')
             bannerData.language = 'en';
             bannerData.country = 'GB';
@@ -237,7 +237,7 @@
                 document.getElementById('size-banner2').innerText = toSize.toLocaleString() + ' bytes';
                 document.getElementById('size-change').innerText =
                     sizeChange.toLocaleString( undefined, { signDisplay: 'always' } );
-            } catch {
+            } catch(e) {
                 statusElement.innerHTML = 'Error getting diff. Do both banners exist?';
             }
         });
