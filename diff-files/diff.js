@@ -180,10 +180,11 @@
 
     // Get initial preview options
     previewOptions = newParseBannerName( banner1 );
-    if ( previewOptions.language === 'ml' ) {
+    console.log( previewOptions );
+    if ( previewOptions.language === 'ml' || previewOptions.language === undefined ) {
         previewOptions.language = 'en';
     }
-    if ( previewOptions.country === '6C' || previewOptions.country === 'WW' ) {
+    if ( previewOptions.country === '6C' || previewOptions.country === 'WW' || previewOptions.country === undefined ) {
         previewOptions.country = 'GB'
     } else if ( previewOptions.country === 'LA' ) {
         previewOptions.country = 'AR';
