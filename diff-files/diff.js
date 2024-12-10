@@ -142,7 +142,7 @@
         if ( options.forceApplePay ) {
             url += '&forceApplePay=1';
         }
-        if ( options.nightMode ) {
+        if ( options.darkMode ) {
             if ( options.device === 'm' ) {
                 url += '&minervanightmode=1';
             } else {
@@ -209,12 +209,12 @@
     });
 
     if ( urlParams.get( 'darkMode' ) ) {
-        previewOptions.nightMode = true;
-        document.getElementById( 'preview-night-mode' ).checked = true;
+        previewOptions.darkMode = true;
+        document.getElementById( 'preview-dark-mode' ).checked = true;
     }
 
-    document.getElementById( 'preview-night-mode' ).addEventListener( 'change', (e) => {
-        previewOptions.nightMode = e.target.checked;
+    document.getElementById( 'preview-dark-mode' ).addEventListener( 'change', (e) => {
+        previewOptions.darkMode = e.target.checked;
         updatePreviewUrls();
         if ( e.target.checked ) {
             urlParams.set( 'darkMode', '1' );
