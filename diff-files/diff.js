@@ -242,14 +242,9 @@
                 statusElement.innerHTML = 'Error getting diff. Do both banners exist?';
             }
         });
-    
-    document.getElementById( 'enable-live-preview' ).addEventListener( 'click', () => {
-        enableLivePreview();
-    });
 
-    document.getElementById( 'disable-live-preview' ).addEventListener( 'click', () => {
-        bodyClasses.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
-    });
+    document.getElementById( 'enable-live-preview' ).addEventListener( 'click', enableLivePreview );
+    document.getElementById( 'disable-live-preview' ).addEventListener( 'click', disableLivePreview );
 
     previewSizeSelect.addEventListener( 'change', (e) => {
         setPreviewSize( previewSizeSelect.value );
@@ -309,9 +304,17 @@
     }
 
     function enableLivePreview() {
+        urlParams.set( 'mode', 'preview' );
+        updateUrl();
         bodyClasses.add( 'live-preview-enabled' );
         updatePreviewUrls();
         setPreviewSize( previewSizeSelect.value );
+    }
+
+    function disableLivePreview() {
+        urlParams.set( 'mode', 'diff' );
+        updateUrl();
+        bodyClasses.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
     }
 
     function setPreviewSize( sizeString ) {
@@ -342,6 +345,12 @@
 
     }
 
+    function updateUrl() {
+        var baseUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname;
+        var url = baseUrl + '?' + urlParams.toString();
+        window.history.pushState( null, '', url );
+    }
+
     // Keyboard shortcuts
     document.addEventListener( 'keydown', (e) => {
 
@@ -356,7 +365,7 @@
                 enableLivePreview();
                 break;
             case 'd':
-                bodyClasses.remove( 'live-preview-enabled', 'zoomed-banner1', 'zoomed-banner2' );
+                disableLivePreview();
                 break;
             case 'r':
                 if ( livePreviewEnabled ) {
@@ -405,6 +414,10 @@
         setTheme( 'dark' );
     } else if ( window.matchMedia( '(prefers-color-scheme: light)' ).matches ) {
         setTheme( 'light' );
+    }
+
+    if ( urlParams.get( 'mode' ) === 'preview' ) {
+        enableLivePreview();
     }
 
 })();
