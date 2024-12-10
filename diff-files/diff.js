@@ -359,7 +359,7 @@
     function updateUrl() {
         var baseUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname;
         var url = baseUrl + '?' + urlParams.toString();
-        window.history.pushState( null, '', url );
+        window.history.replaceState( null, '', url );
     }
 
     // Keyboard shortcuts
