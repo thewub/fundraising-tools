@@ -208,9 +208,20 @@
         updatePreviewUrls();
     });
 
+    if ( urlParams.get( 'darkMode' ) ) {
+        previewOptions.nightMode = true;
+        document.getElementById( 'preview-night-mode' ).checked = true;
+    }
+
     document.getElementById( 'preview-night-mode' ).addEventListener( 'change', (e) => {
         previewOptions.nightMode = e.target.checked;
         updatePreviewUrls();
+        if ( e.target.checked ) {
+            urlParams.set( 'darkMode', '1' );
+        } else {
+            urlParams.delete( 'darkMode' );
+        }
+        updateUrl();
     });
 
     updatePreviewUrls();
