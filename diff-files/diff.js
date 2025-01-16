@@ -259,6 +259,7 @@
 
     previewSizeSelect.addEventListener( 'change', (e) => {
         setPreviewSize( previewSizeSelect.value );
+        resetDebugInfo();
     });
 
     window.addEventListener( 'resize', (e) => {
@@ -307,11 +308,18 @@
             // Only do this if wasn't set already, to avoid repeated loads
             if ( previewFrame1.getAttribute( 'src' ) !== previewUrl1 ) {
                 previewFrame1.setAttribute( 'src', previewUrl1 );
+                resetDebugInfo();
             }
             if ( previewFrame2.getAttribute( 'src' ) !== previewUrl2 ) {
                 previewFrame2.setAttribute( 'src', previewUrl2 );
+                resetDebugInfo();
             }
         }
+    }
+
+    function resetDebugInfo() {
+        document.getElementById( 'debuginfo-banner1' ).innerText = '-';
+        document.getElementById( 'debuginfo-banner2' ).innerText = '-';
     }
 
     function enableLivePreview() {
@@ -430,5 +438,19 @@
     if ( urlParams.get( 'mode' ) === 'preview' ) {
         enableLivePreview();
     }
+
+    // Debug info
+    let formatDebugInfo = ( data ) => {
+        delete data.bannerName;
+        return JSON.stringify( data ).replace( /[{}"]/g, '').replace( /(:|,)/g, '$1 ' );
+    }
+
+    window.addEventListener( 'message', e => {
+        if ( e.data.bannerName === banner1 ) {
+            document.getElementById( 'debuginfo-banner1' ).innerText = formatDebugInfo( e.data );
+        } else if ( e.data.bannerName === banner2 ) {
+            document.getElementById( 'debuginfo-banner2' ).innerText = formatDebugInfo( e.data );
+        }
+    } );
 
 })();

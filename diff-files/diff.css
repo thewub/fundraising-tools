@@ -94,7 +94,7 @@ a:hover {
 }
 
 #header-row {
-    height: 4.5em;
+    height: 6em;
 }
 #header-banner1,
 #header-banner2 {
@@ -140,6 +140,13 @@ input:disabled+label {
 }
 .live-preview-enabled .refresh-preview {
     display: inline;
+}
+
+#debuginfo-banner1, #debuginfo-banner2 {
+    visibility: hidden;
+}
+.live-preview-enabled #debuginfo-banner1, .live-preview-enabled #debuginfo-banner2 {
+    visibility: visible;
 }
 
 .scale {
