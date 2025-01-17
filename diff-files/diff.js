@@ -167,6 +167,7 @@
         languageSelect = document.getElementById('language-select'),
         countrySelect = document.getElementById('country-select'),
         previewSizeSelect = document.getElementById('preview-size-select'),
+        previewRotateCheckbox = document.getElementById('preview-rotate'),
         diffContent, fromSize, toSize, sizeChange;
 
     params += '&fromtitle=' + bannerPagePrefix + banner1;
@@ -258,6 +259,12 @@
     document.getElementById( 'disable-live-preview' ).addEventListener( 'click', disableLivePreview );
 
     previewSizeSelect.addEventListener( 'change', (e) => {
+        previewRotateCheckbox.checked = false;
+        setPreviewSize( previewSizeSelect.value );
+        resetDebugInfo();
+    });
+
+    previewRotateCheckbox.addEventListener( 'change', (e) => {
         setPreviewSize( previewSizeSelect.value );
         resetDebugInfo();
     });
@@ -340,9 +347,13 @@
         const scaleLevels = [ 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1 ];
         const screenWidth = window.innerWidth;
         const availWidth = ( screenWidth / 2 ) - 40;
+        const rotated = previewRotateCheckbox.checked;
         let width, height, scale, scaleZoomed;
 
         [ width, height ] = sizeString.split('x');
+        if ( rotated ) {
+            [ width, height ] = [ height, width ];
+        }
 
         for (let i = scaleLevels.length; i >= 0; i--) {
             scale = scaleLevels[i];
