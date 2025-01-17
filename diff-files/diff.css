@@ -137,6 +137,10 @@ input[type="checkbox"] {
 
 .live-preview-settings {
     visibility: hidden;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 .live-preview-enabled .live-preview-settings {
     visibility: visible;

@@ -35,36 +35,38 @@
             </span>
         </div>
         <div class="live-preview-settings">
-            <label for="preview-size-select">Resolution (r):</label>
-            <select id="preview-size-select">
-                <option value="345x883">345x883 - Galaxy Z Fold 5 (front)</option>
-                <option value="384x824">384x824 - Galaxy S22 Ultra</option>
-                <option value="412x915">412x915 - Galaxy A51</option>
-                <option value="753x1205">753x1205 - Galaxy Tab S8</option>
-                <option value="384x854">384x854 - OnePlus 9</option>
-                <option value="360x780">360x780 - Huawei P30</option>
-                <hr>
-                <option value="375x667">375x667 - iPhone SE 2020</option>
-                <option value="414x896">414x896 - iPhone 11 Pro Max</option>
-                <option value="390x844">390x844 - iPhone 13</option>
-                <option value="430x932">430x932 - iPhone 15 Plus</option>
-                <option value="744x1133">744x1133 - iPad Mini 2021</option>
-                <hr>
-                <option value="1920x1080">1920x1080</option>
-                <option value="1366x768">1366x768</option>
-                <option value="1536x864">1536x864</option>
-                <option value="1280x720">1280x720</option>
-                <option value="1440x900">1440x900</option>
-                <option value="2560x1440">2560x1440</option>
-            </select>
-            <input type="checkbox" id="preview-rotate" />
-            <label for="preview-rotate">Rotate</label>
-            <span class="scale">
-                Scale: <span id="scale-amount"></span><span id="scale-amount-zoomed"></span>×
-            </span>
-            <span class="zoom-settings">
+            <div class="preview-size-settings">
+                <label for="preview-size-select">Resolution (r):</label>
+                <select id="preview-size-select">
+                    <option value="345x883">345x883 - Galaxy Z Fold 5 (front)</option>
+                    <option value="384x824">384x824 - Galaxy S22 Ultra</option>
+                    <option value="412x915">412x915 - Galaxy A51</option>
+                    <option value="753x1205">753x1205 - Galaxy Tab S8</option>
+                    <option value="384x854">384x854 - OnePlus 9</option>
+                    <option value="360x780">360x780 - Huawei P30</option>
+                    <hr>
+                    <option value="375x667">375x667 - iPhone SE 2020</option>
+                    <option value="414x896">414x896 - iPhone 11 Pro Max</option>
+                    <option value="390x844">390x844 - iPhone 13</option>
+                    <option value="430x932">430x932 - iPhone 15 Plus</option>
+                    <option value="744x1133">744x1133 - iPad Mini 2021</option>
+                    <hr>
+                    <option value="1920x1080">1920x1080</option>
+                    <option value="1366x768">1366x768</option>
+                    <option value="1536x864">1536x864</option>
+                    <option value="1280x720">1280x720</option>
+                    <option value="1440x900">1440x900</option>
+                    <option value="2560x1440">2560x1440</option>
+                </select>
+                <input type="checkbox" id="preview-rotate" />
+                <label for="preview-rotate">Rotate</label>
+                <span class="scale">
+                    Scale: <span id="scale-amount"></span><span id="scale-amount-zoomed"></span>×
+                </span>
+            </div>
+            <div class="zoom-settings">
                 Zoom: <a href="#" id="zoom-both">Both (0)</a> <a href="#" id="zoom-banner1">Banner 1 (1)</a> <a href="#" id="zoom-banner2">Banner 2 (2)</a>
-            </span>
+            </div>
         </div>
     </div>
     <div id="header-row">
