@@ -188,7 +188,7 @@
     if ( previewOptions.country === '6C' || previewOptions.country === 'WW' || previewOptions.country === undefined ) {
         previewOptions.country = 'GB'
     } else if ( previewOptions.country === 'LA' ) {
-        previewOptions.country = 'AR';
+        previewOptions.country = 'CO';
     }
     previewOptions.article = 'NASA';
 
