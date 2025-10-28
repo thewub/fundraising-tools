@@ -88,7 +88,7 @@
             testVariant: x[7]
         }
         if ( bannerName.includes('_m_') ) {
-            bannerData.device = 'm';
+            bannerData.device = 'mobile';
         }
         return bannerData;
     }
@@ -107,15 +107,15 @@
                 bannerData.country = langCountry[2];
             }
             if ( bannerName.match( /_m_|_mob_|_ipd_/ ) ) {
-                bannerData.device = 'm';
+                bannerData.device = 'mobile';
             } else {
-                bannerData.device = 'dsk';
+                bannerData.device = 'desktop';
             }
         } catch(e) {
             console.warn('Error parsing banner name, using default values')
             bannerData.language = 'en';
             bannerData.country = 'GB';
-            bannerData.device = 'dsk';
+            bannerData.device = 'desktop';
         }
         return bannerData;
     }
@@ -133,17 +133,13 @@
             options.language = 'no';
         }
 
-        if ( options.device === 'm' ) {
-            url = `https://${options.language}.m.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
-        } else {
-            url = `https://${options.language}.wikipedia.org/wiki/${options.article}?country=${options.country}&banner=${bannerName}`;
-        }
+        url = `https://${options.language}.wikipedia.org/wiki/${options.article}?useformat=${options.device}&country=${options.country}&banner=${bannerName}`;
 
         if ( options.forceApplePay ) {
             url += '&forceApplePay=1';
         }
         if ( options.darkMode ) {
-            if ( options.device === 'm' ) {
+            if ( options.device === 'mobile' ) {
                 url += '&minervanightmode=1';
             } else {
                 url += '&vectornightmode=1';
@@ -166,6 +162,7 @@
         previewOptions,
         languageSelect = document.getElementById('language-select'),
         countrySelect = document.getElementById('country-select'),
+        previewDeviceSelect = document.getElementById('preview-device-select'),
         previewSizeSelect = document.getElementById('preview-size-select'),
         previewRotateCheckbox = document.getElementById('preview-rotate'),
         diffContent, fromSize, toSize, sizeChange;
@@ -201,6 +198,12 @@
     countrySelect.value = previewOptions.country;
     countrySelect.addEventListener( 'change', (e) => {
         previewOptions.country = countrySelect.value;
+        updatePreviewUrls();
+    });
+
+    previewDeviceSelect.value = previewOptions.device;
+    previewDeviceSelect.addEventListener( 'change', (e) => {
+        previewOptions.device = previewDeviceSelect.value;
         updatePreviewUrls();
     });
 
@@ -274,7 +277,7 @@
     });
 
     // Set initial size
-    if ( previewOptions.device === 'm' ) {
+    if ( previewOptions.device === 'mobile' ) {
         previewSizeSelect.value = '390x844';
     } else {
         previewSizeSelect.value = '1280x720';
