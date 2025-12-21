@@ -101,7 +101,7 @@
     function newParseBannerName( bannerName ) {
         let bannerData = {};
         try {
-            let langCountry = bannerName.match( /_([a-z]{2,})([0-9A-Z]{2,})_/ );
+            let langCountry = bannerName.match( /_([a-z]{2,})([0-9A-Z]{2})_/ );
             if ( langCountry ) {
                 bannerData.language = langCountry[1];
                 bannerData.country = langCountry[2];
