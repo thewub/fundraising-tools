@@ -401,7 +401,8 @@
                 disableLivePreview();
                 break;
             case 'r':
-                if ( livePreviewEnabled ) {
+                // ignore with Ctrl/Cmd to allow browser refresh
+                if ( !e.metaKey && !e.ctrlKey && livePreviewEnabled ) {
                     previewSizeSelect.showPicker();
                 }
                 break;
