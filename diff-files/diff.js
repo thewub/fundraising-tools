@@ -379,7 +379,7 @@
     }
 
     function updateUrl() {
-        var baseUrl = window.location.protocol + '//' + window.location.hostname + window.location.pathname;
+        var baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
         var url = baseUrl + '?' + urlParams.toString();
         window.history.replaceState( null, '', url );
     }
