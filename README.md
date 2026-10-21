@@ -1,3 +1,6 @@
+**Copied from gitlab to get around temporary hosting issues. https://gitlab.wikimedia.org/toolforge-repos/fundraising-tools remains the canonical source**
+
+
 Miscellaneous WMF Fundraising tools. Handling **public, non-sensitive** data only!
 
 # diff
